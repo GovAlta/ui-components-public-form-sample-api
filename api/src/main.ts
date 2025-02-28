@@ -27,11 +27,12 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 app
-  .get("/pf", async(req, res) => {
+  .get("/pf/:name", async(req, res) => {
     const userId = 1;
-    const data = await PublicForm.findAll({ where: { userId } });
+    const name = req.params.name;
+    const data = await PublicForm.findOne({ where: { userId, name } });
 
-    res.json(data || []);
+    res.json(data || {});
     res.status(200);
   })
   .put("/pf", async (req, res) => {

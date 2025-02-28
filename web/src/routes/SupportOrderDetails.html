@@ -1,0 +1,216 @@
+<goa-circular-progress
+  variant="fullscreen"
+  size="large"
+  message="Fetching data..."
+  [attr.visible]="showSpinner"
+></goa-circular-progress>
+
+<goa-public-form
+  name="parent-form"
+  [status]="formStatus"
+  (_complete)="onComplete()"
+  (_init)="_mainFormController.init($event)"
+  (_stateChange)="updateState($event)"
+>
+  <goa-public-form-page
+    id="what-is-your-role"
+    heading="What is your role in the court order?"
+    section-title="Support order details"
+    type="first-step"
+    back-url="/fsos"
+    (_continue)="onPageChange($event, 'what-is-your-role')"
+  >
+    <goa-fieldset>
+      <goa-form-item name="Role" helptext="some help text">
+        <goa-radio-group name="role">
+          <goa-radio-item value="Recipient" label="Recipient"></goa-radio-item>
+          <goa-radio-item value="Payor" label="Payor"></goa-radio-item>
+        </goa-radio-group>
+      </goa-form-item>
+    </goa-fieldset>
+  </goa-public-form-page>
+
+  <goa-public-form-page
+    id="description"
+    section-title="Support order details"
+    heading="Some description"
+    sub-heading="Some subheading"
+    type="step"
+    (_continue)="onPageChange($event, 'description')"
+  >
+    <goa-details heading="Some important detail">
+      asdfasdf
+    </goa-details>
+  </goa-public-form-page>
+
+
+  <goa-public-form-page
+    id="payor-name"
+    heading="Payor Name"
+    (_continue)="onPageChange($event, 'payor-name')"
+  >
+    <goa-fieldset>
+      <goa-form-item name="First name" label="First name">
+        <goa-input name="firstName"></goa-input>
+      </goa-form-item>
+      <goa-form-item name="Last name" label="Last name">
+        <goa-input name="lastName"></goa-input>
+      </goa-form-item>
+    </goa-fieldset>
+  </goa-public-form-page>
+
+  <!--  Subform -->
+
+  <goa-public-form-page
+    id="children-subform"
+    type="multistep"
+    (_continue)="onPageChange($event, 'children-subform')"
+  >
+    <goa-public-subform
+      id="children-subform"
+      name="children-subform"
+      (_init)="_childFormController.initList($event)"
+      (_stateChange)="updateChildrenState($event)"
+    >
+      <goa-public-subform-index
+        slot="subform-index"
+        section-title="Support order details"
+        heading="Child(ren)'s profile"
+        action-button-text="Add Child"
+        [attr.button-visibility]="continueButtonVisibility"
+      >
+        <goa-text mb="l" *ngIf="children().length === 0">
+          Include the child(ren) listed in your court order or agreement that you want MEP to enforce support for.
+          Select
+          ‘Add child’ to start.
+        </goa-text>
+
+        <goa-table width="100%" mb="xl" *ngIf="children().length > 0">
+          <thead>
+          <tr>
+            <th>First name</th>
+            <th>Last name</th>
+            <th></th>
+            <th></th>
+          </tr>
+          </thead>
+          <tr *ngFor="let item of children(); index as i">
+            <td>
+              {{ item["firstName"] }}
+            </td>
+            <td>
+              {{ item["lastName"] }}
+            </td>
+            <td class="goa-table-number-header">
+              <goa-link-button (_click)="_childFormController.edit(i)">Edit</goa-link-button>
+            </td>
+            <td class="goa-table-number-header" style="width: 0px">
+              <goa-link-button (_click)="showModal(i)">Delete</goa-link-button>
+            </td>
+          </tr>
+        </goa-table>
+      </goa-public-subform-index>
+
+      <goa-public-form-page
+        id="name"
+        section-title="Child's profile"
+        heading="Name"
+        sub-heading="Child's name"
+        button-text="Continue"
+        (_continue)="onChildPageChange($event, 'name')"
+      >
+        <goa-fieldset>
+          <goa-form-item name="First name" label="First name">
+            <goa-input name="firstName"></goa-input>
+          </goa-form-item>
+          <goa-form-item name="Middle name" label="Middle name">
+            <goa-input name="middleName"></goa-input>
+          </goa-form-item>
+          <goa-form-item name="Last name" label="Last name">
+            <goa-input name="lastName"></goa-input>
+          </goa-form-item>
+        </goa-fieldset>
+      </goa-public-form-page>
+
+      <goa-public-form-page
+        id="alternate-name"
+        section-title="Child's profile"
+        heading="Does your child go by a different name?"
+        (_continue)="onChildPageChange($event, 'alternate-name')"
+      >
+        <goa-fieldset>
+          <goa-form-item name="Alternate name" label="Alternate name" requirement="optional">
+            <goa-input name="alternate-name"></goa-input>
+          </goa-form-item>
+        </goa-fieldset>
+      </goa-public-form-page>
+
+      <goa-public-form-page
+        id="dob"
+        section-title="Child's profile"
+        heading="Your child's birthdate"
+        (_continue)="onChildPageChange($event, 'dob')"
+      >
+        <goa-fieldset>
+          <goa-form-item name="Date of birth" label="Date of birth">
+            <goa-date-picker type="input" name="dob"></goa-date-picker>
+          </goa-form-item>
+        </goa-fieldset>
+      </goa-public-form-page>
+
+      <goa-public-form-page
+        id="complete"
+        heading="Summary"
+        section-title="Child's profile"
+        type="summary"
+        button-text="Back to list"
+      >
+        <goa-public-form-summary></goa-public-form-summary>
+      </goa-public-form-page>
+
+    </goa-public-subform>
+  </goa-public-form-page>
+
+  <!--  End of subform-->
+
+  <goa-public-form-page
+    id="address"
+    section-title="Support order details"
+    heading="Your current address"
+    (_continue)="onPageChange($event, 'address')"
+  >
+    <goa-fieldset>
+      <goa-form-item name="City" label="City" helptext="Where you live">
+        <goa-input name="city"></goa-input>
+      </goa-form-item>
+      <goa-form-item name="Address" label="Address">
+        <goa-input name="address"></goa-input>
+      </goa-form-item>
+      <goa-form-item name="Postal Code" label="Postal Code">
+        <goa-input name="postal-code"></goa-input>
+      </goa-form-item>
+    </goa-fieldset>
+  </goa-public-form-page>
+
+  <goa-public-form-page
+    id="summary"
+    section-title="Support order details"
+    type="summary"
+    heading="Summary"
+  >
+    <goa-public-form-summary></goa-public-form-summary>
+  </goa-public-form-page>
+
+</goa-public-form>
+
+
+<goa-modal heading="Delete this child?" role="alertdialog" [attr.open]="showDeleteModal">
+  <goa-button-group alignment="end" mt="xl">
+    <goa-button type="tertiary" (_click)="onDeleteCancel()">
+      Cancel
+    </goa-button>
+    <goa-button type="primary" (_click)="onDeleteConfirm()">
+      Delete
+    </goa-button>
+  </goa-button-group>
+</goa-modal>
