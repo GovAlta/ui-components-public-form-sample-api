@@ -1,5 +1,7 @@
 import {FormState} from "./types";
 
+export type Status = "Not started" | "In progress" | "Submitted" | "Update needed" | "Completed";
+
 export async function fetchData(path: string): Promise<FormState> {
   const req = await fetch(`http://localhost:3000/pf/${path}`, { mode: "cors" })
   const json = await req.json();
@@ -21,8 +23,6 @@ export function getValue(state: FormState | undefined, section: string, id: stri
   return value;
 }
 
-export type Status = "Not started" | "In progress" | "Submitted" | "Changes requested" | "Completed";
-
 export function getStatus(data: Record<string, unknown> | undefined): Status {
   const status = data?.["status"];
   switch (status) {
@@ -32,8 +32,8 @@ export function getStatus(data: Record<string, unknown> | undefined): Status {
       return "In progress";
     case "submitted":
       return "Submitted";
-    case "changes-requested":
-      return "Changes requested";
+    case "update-needed":
+      return "Update needed";
     case "complete":
       return "Completed";
     default:
@@ -45,13 +45,13 @@ export function getBadgeType(data: Record<string, unknown> | undefined) {
   const status = data?.["status"];
   switch (status) {
     case "not-started":
-      return "light";
+      return "information";
     case "in-progress":
-      return "success";
-    case "submitted":
       return "important";
-    case "changes-requested":
-      return "emergency";
+    case "submitted":
+      return "success";
+    case "update-needed":
+      return "important";
     case "complete":
       return "success";
     default:
