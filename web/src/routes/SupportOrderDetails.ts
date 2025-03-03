@@ -2,18 +2,17 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import {
   dateValidator,
-  GoabBlock,
-  GoabButton,
+  GoabCheckbox, GoabCheckboxOnChangeDetail, GoabFormItem, GoabInput,
   lengthValidator,
   requiredValidator,
 } from "@abgov/angular-components";
 import { NgFor, NgIf } from "@angular/common";
 import { PublicFormController } from "@abgov/ui-components-common";
-import { GoabDatePicker } from "@abgov/angular-components";
 
 type Page =
   | "what-is-your-role"
   | "description"
+  | "identification"
   | "payor-name"
   | "children-subform"
   | "address"
@@ -25,29 +24,21 @@ type ChildPage = "name" | "alternate-name" | "dob" | "complete";
   standalone: true,
   selector: "abgov-fsos",
   templateUrl: "./SupportOrderDetails.html",
-  imports: [NgFor, NgIf, GoabDatePicker, GoabButton, GoabBlock],
+  imports: [NgFor, NgIf, GoabCheckbox, GoabFormItem, GoabInput],
   styles: ``,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class SupportOrderDetailsComponent implements OnInit {
-  someDate = "2024-06-12";
 
-  resetDate() {
-    this.someDate = "2026-02-13";
+  sinChecked= false
+  ahcnChecked= false
+
+  sinCheckChange(e: GoabCheckboxOnChangeDetail) {
+    this.sinChecked = e.checked;
   }
 
-  onDateChange(e: Event) {
-    this.someDate = (e as CustomEvent).detail.value;
-  }
-
-  onChange(e: Event) {
-
-  }
-
-  someText = ""
-  inputChange(e: Event) {
-    console.log((e as CustomEvent).detail)
-    this.someText = (e as CustomEvent).detail.value.replace("x", "")
+  ahcnCheckChange(e: GoabCheckboxOnChangeDetail) {
+    this.ahcnChecked = e.checked;
   }
 
   _childFormController: PublicFormController<ChildPage>;
@@ -134,7 +125,10 @@ export class SupportOrderDetailsComponent implements OnInit {
         dest = this.handleRole(e);
         break;
       case "description":
-        dest = this.handleDescription(e);
+        dest = "identification";
+        break;
+      case "identification":
+        dest = this.handleIdentification(e);
         break;
       case "payor-name":
         dest = this.handlePayorName(e);
@@ -200,7 +194,24 @@ export class SupportOrderDetailsComponent implements OnInit {
     return "description";
   }
 
-  handleDescription(e: Event): Page | undefined {
+  private handleIdentification(e: Event): Page | undefined {
+    let ok = true;
+    if (this.sinChecked) {
+      const [sinOk ] = this._mainFormController.validate("sin", e, [
+        requiredValidator("SIN is required"),
+      ]);
+      ok &&= sinOk;
+    }
+    if (this.ahcnChecked) {
+      const [ahcnOk ] = this._mainFormController.validate("ahcn", e, [
+        requiredValidator("AHCN is required"),
+      ]);
+      ok &&= ahcnOk;
+    }
+
+    if (!ok) {
+      return;
+    }
     return "children-subform";
   }
 
@@ -260,4 +271,5 @@ export class SupportOrderDetailsComponent implements OnInit {
 
     return "complete";
   }
+
 }
